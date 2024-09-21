@@ -9,4 +9,5 @@ public interface FormRepository extends JpaRepository<Form, Long> {
     boolean existsBySlug(String slug);
 
     Form findBySlug(String slug);
+
 }
