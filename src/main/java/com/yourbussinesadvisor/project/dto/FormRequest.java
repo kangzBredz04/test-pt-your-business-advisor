@@ -1,4 +1,4 @@
-package com.yourbussinesadvisor.project.controller;
+package com.yourbussinesadvisor.project.dto;
 
 import lombok.Data;
 

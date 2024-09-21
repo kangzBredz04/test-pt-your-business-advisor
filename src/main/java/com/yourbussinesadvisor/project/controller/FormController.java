@@ -1,5 +1,6 @@
 package com.yourbussinesadvisor.project.controller;
 
+import com.yourbussinesadvisor.project.dto.FormRequest;
 import com.yourbussinesadvisor.project.model.AllowedDomain;
 import com.yourbussinesadvisor.project.model.Form;
 import com.yourbussinesadvisor.project.model.User;

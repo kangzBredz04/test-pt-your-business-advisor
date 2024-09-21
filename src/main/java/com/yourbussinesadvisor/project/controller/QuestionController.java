@@ -1,5 +1,6 @@
 package com.yourbussinesadvisor.project.controller;
 
+import com.yourbussinesadvisor.project.dto.QuestionRequest;
 import com.yourbussinesadvisor.project.model.ChoiceType;
 import com.yourbussinesadvisor.project.model.Form;
 import com.yourbussinesadvisor.project.model.Question;
