@@ -15,14 +15,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.*;
 
 @RestController
-@RequestMapping("/api/v1/forms/{form_slug}/questions")
+@RequestMapping("/api/v1/forms")
 @RequiredArgsConstructor
 public class QuestionController {
 
     private final QuestionRepository questionRepository;
     private final FormRepository formRepository;
 
-    @PostMapping
+    @PostMapping("/{form_slug}/questions")
     public ResponseEntity<?> addQuestion(@PathVariable String form_slug, @RequestBody QuestionRequest questionRequest) {
         var authentication = SecurityContextHolder.getContext().getAuthentication();
 
@@ -50,6 +50,7 @@ public class QuestionController {
         }
 
         // Create the question
+        System.out.println(questionRequest);
         Question question = new Question();
         question.setName(questionRequest.getName());
         question.setChoiceType(questionRequest.getChoiceType());
