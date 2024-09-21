@@ -6,6 +6,7 @@ import com.yourbussinesadvisor.project.model.Form;
 import com.yourbussinesadvisor.project.model.User;
 import com.yourbussinesadvisor.project.repository.AllowedDomainsRepository;
 import com.yourbussinesadvisor.project.repository.FormRepository;
+import com.yourbussinesadvisor.project.repository.QuestionRepository;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -24,6 +25,7 @@ public class FormController {
 
     private final FormRepository formRepository;
     private final AllowedDomainsRepository allowedDomainsRepository;
+    private final QuestionRepository questionRepository;
 
     @PostMapping
     public ResponseEntity<?> createForm(@Valid @RequestBody FormRequest formRequest) {
@@ -118,6 +120,57 @@ public class FormController {
         Map<String, Object> response = Map.of(
                 "message", "Get all forms success",
                 "forms", formResponses);
+
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{form_slug}")
+    public ResponseEntity<?> getFormDetail(@PathVariable String form_slug) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the user is authenticated
+        if (authentication == null || authentication.getPrincipal() == "anonymousUser") {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Unauthenticated."));
+        }
+
+        // Find the form by slug
+        Form form = formRepository.findBySlug(form_slug);
+        if (form == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Form not found"));
+        }
+
+        // Get the allowed domains
+        List<String> allowedDomains = allowedDomainsRepository.findByFormId(form.getId())
+                .stream().map(AllowedDomain::getDomain).collect(Collectors.toList());
+
+        // Get the questions for the form
+        List<Map<String, Object>> questions = questionRepository.findByFormId(form.getId())
+                .stream().map(question -> {
+                    Map<String, Object> questionMap = new HashMap<>();
+                    questionMap.put("id", question.getId());
+                    questionMap.put("form_id", question.getForm().getId());
+                    questionMap.put("name", question.getName());
+                    questionMap.put("choice_type", question.getChoiceType().name().toLowerCase().replace("_", " "));
+                    questionMap.put("choices", question.getChoices());
+                    questionMap.put("is_required", question.getIsRequired() ? 1 : 0);
+                    return questionMap;
+                })
+                .collect(Collectors.toList());
+
+        // Build the response body
+        Map<String, Object> response = Map.of(
+                "message", "Get form success",
+                "form", Map.of(
+                        "id", form.getId(),
+                        "name", form.getName(),
+                        "slug", form.getSlug(),
+                        "description", form.getDescription(),
+                        "limit_one_response", form.isLimitOneResponse(),
+                        "creator_id", form.getCreatorId(),
+                        "allowed_domains", allowedDomains,
+                        "questions", questions));
 
         return ResponseEntity.ok(response);
     }
