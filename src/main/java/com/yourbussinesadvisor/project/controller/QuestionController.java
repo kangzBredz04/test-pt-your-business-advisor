@@ -69,4 +69,36 @@ public class QuestionController {
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
+    @DeleteMapping("/{form_slug}/questions/{question_id}")
+    public ResponseEntity<?> deleteQuestion(@PathVariable String form_slug, @PathVariable Long question_id) {
+        var authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        // Check if the user is authenticated
+        if (authentication == null || authentication.getPrincipal().equals("anonymousUser")) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("message", "Unauthenticated."));
+        }
+
+        // Find the form by slug
+        Form form = formRepository.findBySlug(form_slug);
+        if (form == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Form not found"));
+        }
+
+        // Find the question by ID and form
+        Optional<Question> questionOptional = questionRepository.findByIdAndForm(question_id, form);
+        if (questionOptional.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(Map.of("message", "Question not found"));
+        }
+
+        // Delete the question
+        questionRepository.delete(questionOptional.get());
+
+        // Return success response
+        return ResponseEntity.ok(Map.of("message", "Remove question success"));
+    }
+
 }
