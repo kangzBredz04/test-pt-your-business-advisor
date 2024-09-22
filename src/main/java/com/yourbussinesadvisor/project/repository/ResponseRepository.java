@@ -14,4 +14,6 @@ public interface ResponseRepository extends JpaRepository<Response, Long> {
     List<Response> findByUserId(Long userId);
 
     List<Response> findByForm(Form form);
+
+    List<Response> findByFormSlug(String slug);
 }
